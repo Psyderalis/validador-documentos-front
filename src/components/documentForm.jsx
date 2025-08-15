@@ -1,15 +1,14 @@
 import { useRef, useState } from 'react';
-import { Html5Qrcode } from 'html5-qrcode';
 
 export const UploadDocumentForm = () => {
 	const [file, setFile] = useState(null);
-	const [qrResult, setQrResult] = useState(null);
 	const [responseMessage, setResponseMessage] = useState('');
 	const [isError, setIsError] = useState(false);
 	const [analisysResult, setAnalysisResult] = useState(null);
 	const [isResultVisible, setIsResultVisible] = useState(false);
 	const [isLoading, setIsLoading] = useState(false);
 	const [uploadData, setUploadData] = useState(null);
+	const [disableValidateBtn, setDisableValidateBtn] = useState(true);
 	const inputFileRef = useRef(null);
 
 	const handleFileChange = async (e) => {
@@ -18,22 +17,8 @@ export const UploadDocumentForm = () => {
 
 		setFile(selectedFile);
 		setResponseMessage('');
-		setQrResult(null);
-
-		// Intentar leer QR del archivo seleccionado
-		const html5QrCode = new Html5Qrcode('reader');
-		try {
-			const decodedText = await html5QrCode.scanFile(selectedFile, true);
-			setQrResult(decodedText);
-			// console.log('QR detectado:', decodedText);
-		} catch (err) {
-			console.error('No se detectó QR:', err);
-			setIsError(true)
-			setResponseMessage(
-				'No se detecta QR en el documento. Intente con una imagen más nítida'
-			);
-			setQrResult(null);
-		}
+		setIsResultVisible(false);
+		setDisableValidateBtn(false);
 	};
 
 	const handleUpload = async (e) => {
@@ -43,13 +28,11 @@ export const UploadDocumentForm = () => {
 			setIsError(true);
 			return;
 		}
-		setAnalysisResult('')
+		setAnalysisResult('');
+		setIsResultVisible(false)
 
 		const formData = new FormData();
 		formData.append('document', file);
-		if (qrResult) {
-			formData.append('qrUrl', qrResult);
-		}
 
 		try {
 			const uploadResponse = await fetch(
@@ -63,6 +46,7 @@ export const UploadDocumentForm = () => {
 			setUploadData(res);
 			setResponseMessage(res.message);
 			setIsError(false);
+			setDisableValidateBtn(false);
 		} catch (error) {
 			setResponseMessage(
 				'Error al cargar documento. Por favor intente nuevamente.'
@@ -75,7 +59,7 @@ export const UploadDocumentForm = () => {
 	const handleValidate = async (e) => {
 		e.preventDefault();
 		if (!file) {
-			setResponseMessage('Por favor, seleccione un documento.');
+			setResponseMessage('Por favor, seleccione y cargue un documento.');
 			setIsError(true);
 			return;
 		}
@@ -96,9 +80,9 @@ export const UploadDocumentForm = () => {
 			setResponseMessage(
 				'Error al validar documento. Por favor intente nuevamente.'
 			);
+			setIsLoading(false);
 			setIsError(true);
 			console.error(error);
-			setIsLoading(false);
 		}
 	};
 
@@ -146,18 +130,18 @@ export const UploadDocumentForm = () => {
 						className={`${
 							isError
 								? 'text-red-600 text-sm mb-2'
-								: 'text-green-600 text-sm mb-2'
+								: 'text-gray-600 text-sm mb-2'
 						} mb-4 min-h-[1.25rem]`}
 					>
 						{responseMessage || ''}
 					</p>
 				</div>
-				
+
 				{/* VALIDAR DOCUMENTO */}
+				<p className="text-sm leading-tight mb-4">
+					Paso 2: Haga clic en "validar" para analizar el documento.
+				</p>
 				<div className="flex flex-col justify-center items-center">
-					<p className="text-sm leading-tight mb-4">
-						Paso 2: Haga clic en "validar" para analizar el documento.
-					</p>
 					<div className="mb-3 flex gap-x-2 w-full items-center justify-center">
 						{isLoading && (
 							<div className="text-m flex justify-center items-center gap-5 text-gray-600">
@@ -184,9 +168,12 @@ export const UploadDocumentForm = () => {
 					</div>
 					<div className="flex items-center">
 						<button
-							className="bg-green-800 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded"
+							className={`bg-green-800 text-white font-semibold py-2 px-4 rounded ${
+								disableValidateBtn ? '' : 'hover:bg-green-600'
+							}`}
 							type="button"
 							onClick={handleValidate}
+							disabled={disableValidateBtn}
 						>
 							Validar
 						</button>
