@@ -1,14 +1,12 @@
 
-// import { UploadDocumentForm } from '../components/UploadDocumentForm';´
-
-import { UploadDocumentForm } from "../components/QRReader";
+import { UploadDocumentForm } from "../components/documentForm";
 
 
 export const HomePage = () => {
 	return (
 		<div className="flex flex-col items-center justify-center min-h-screen gap-y-10 bg-gray-100">
 			<h1 className="text-2xl font-semibold text-gray-700">
-				Validador de Revisión técnica
+				Validador de Revisión Técnica
 			</h1>
 			<UploadDocumentForm />
 		</div>
