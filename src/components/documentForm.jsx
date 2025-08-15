@@ -18,7 +18,7 @@ export const UploadDocumentForm = () => {
 		setFile(selectedFile);
 		setResponseMessage('');
 		setIsResultVisible(false);
-		setDisableValidateBtn(false);
+		setDisableValidateBtn(true);
 	};
 
 	const handleUpload = async (e) => {
@@ -29,7 +29,7 @@ export const UploadDocumentForm = () => {
 			return;
 		}
 		setAnalysisResult('');
-		setIsResultVisible(false)
+		setIsResultVisible(false);
 
 		const formData = new FormData();
 		formData.append('document', file);
@@ -76,6 +76,8 @@ export const UploadDocumentForm = () => {
 			setIsLoading(false);
 			setIsResultVisible(true);
 			setAnalysisResult(analysisData.valid);
+			setDisableValidateBtn(true);
+			setFile(null);
 		} catch (error) {
 			setResponseMessage(
 				'Error al validar documento. Por favor intente nuevamente.'
@@ -142,6 +144,9 @@ export const UploadDocumentForm = () => {
 					Paso 2: Haga clic en "validar" para analizar el documento.
 				</p>
 				<div className="flex flex-col justify-center items-center">
+					<p className={`text-gray-600 text-sm mb-2 mb-4 min-h-[1.25rem]`}>
+						{(uploadData && uploadData.fileName) || ''}
+					</p>
 					<div className="mb-3 flex gap-x-2 w-full items-center justify-center">
 						{isLoading && (
 							<div className="text-m flex justify-center items-center gap-5 text-gray-600">
@@ -166,6 +171,7 @@ export const UploadDocumentForm = () => {
 							</div>
 						)}
 					</div>
+
 					<div className="flex items-center">
 						<button
 							className={`bg-green-800 text-white font-semibold py-2 px-4 rounded ${
